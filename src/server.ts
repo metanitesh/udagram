@@ -63,7 +63,7 @@ import fs from 'fs';
    const url = query.image_url;
   
    if(!url){
-     res.send("Enter image url in query parameter <br/> e.g. http://localhost:8082/filteredimage?image_url=https://i.ytimg.com/vi/jq9fqBpIr_Y/maxresdefault.jpg")
+     res.status(422).send("Error! <br><br> Enter image url in query parameter <br/> e.g. http://localhost:8082/filteredimage?image_url=https://i.ytimg.com/vi/jq9fqBpIr_Y/maxresdefault.jpg")
    }
 
    try{
