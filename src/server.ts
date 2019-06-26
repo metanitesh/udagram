@@ -1,6 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { filterImageFromURL, deleteLocalFiles } from './util/util';
 import fs from 'fs';
 
 (async () => {
@@ -10,7 +10,7 @@ import fs from 'fs';
 
   // Set the network port
   const port = process.env.PORT || 8082;
-  
+
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -31,24 +31,24 @@ import fs from 'fs';
   /**************************************************************************** */
 
   //! END @TODO1
-  
+
   // Root Endpoint
   // Displays a simple message to the user
-  app.get('/', function(req, res){
+  app.get('/', function (req, res) {
     res.send('Welcome!! <br><br> Enter image url in query parameter <br/> e.g. http://localhost:8082/filteredimage?image_url=https://i.ytimg.com/vi/jq9fqBpIr_Y/maxresdefault.jpg')
   })
 
 
-  function cleanUp(req: any, res: any, next: () => void){
+  function cleanUp(req: any, res: any, next: () => void) {
     fs.readdir('./src/util/tmp', (err, files) => {
 
-      if(files === undefined || files.length === 0){
+      if (files === undefined || files.length === 0) {
         next();
         return;
       }
-    
-      const absolutePaths = files.map((file)=>{
-        return __dirname + '/util/tmp/' +file
+
+      const absolutePaths = files.map((file) => {
+        return __dirname + '/util/tmp/' + file
       })
 
       deleteLocalFiles(absolutePaths);
@@ -58,31 +58,42 @@ import fs from 'fs';
   }
 
   app.get('/filteredimage', cleanUp, async (req, res) => {
-   
-   const query = req.query;
-   const url = query.image_url;
-  
-   if(!url){
-     res.status(422).send("Error! <br><br> Enter image url in query parameter <br/> e.g. http://localhost:8082/filteredimage?image_url=https://i.ytimg.com/vi/jq9fqBpIr_Y/maxresdefault.jpg")
-   }
 
-   try{
+    const query = req.query;
+    const url = query.image_url;
+    const maxTime = 3000;
+    let error = false;
+    let response = false;
+
+    if (!url) {
+      res.status(422).send("Error! <br><br> Enter image url in query parameter <br/> e.g. http://localhost:8082/filteredimage?image_url=https://i.ytimg.com/vi/jq9fqBpIr_Y/maxresdefault.jpg")
+    }
+
+    setTimeout(function () {
+      error = true;
+      
+      if(!response){
+        res.status(408).send('Error !<br> Request Timeout');
+      }
+    }, maxTime)
+
     var result = await filterImageFromURL(url);
-    res.sendFile(result);
-   }catch(err){
-     res.status(422).send('unable to process');
-   }
+    response = true;
+
+    if (!error) {
+      res.sendFile(result);
+    }
 
   });
 
-  app.get('*', function(req, res){
+  app.get('*', function (req, res) {
     res.status(404).send('INVALID REQUEST');
   })
 
 
   // Start the Server
-  app.listen( port, () => {
-      console.log( `server running http://localhost:${ port }` );
-      console.log( `press CTRL+C to stop server` );
-  } );
+  app.listen(port, () => {
+    console.log(`server running http://localhost:${port}`);
+    console.log(`press CTRL+C to stop server`);
+  });
 })();
