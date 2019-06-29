@@ -1,4 +1,4 @@
-# Udagram Image Filtering Microservice
+# Udagram Project 2 - Full Stack Deployment
 
 ## Tasks
 
